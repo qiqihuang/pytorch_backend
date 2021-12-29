@@ -200,8 +200,35 @@ ModelState::LoadModel(
   // model loading: https://pytorch.org/cppdocs/notes/inference_mode.html
   torch::InferenceMode infer_guard(EnabledInferenceMode());
 
+  printf("\n*********************HHHHHHHHHHHHHHHH11111111111111111*****************************\n");
+#if 0
+  printf("model_data_str %u\n", model_data_str.size());
+  WriteBuffer2File("/models/hq_model_o.txt", "wb+", model_data_str);
+  std::string e_model_data;
+  aes_encrypt_cbc("1234567890", model_data_str, e_model_data);
+  printf("e_model_data %u\n", e_model_data.size());
+  WriteBuffer2File("/models/hq_model_e.txt", "wb+", e_model_data);
+  std::string d_model_data;
+  aes_decrypt_cbc("1234567890", e_model_data, d_model_data);
+  printf("d_model_data %u\n", e_model_data.size());
+  WriteBuffer2File("/models/hq_model_d.txt", "wb+", d_model_data);
+  if (0 == model_data_str.compare(d_model_data))
+  {
+    printf("aes_cbc success !!!\n");
+  }
+  else
+  {
+    printf("aes_cbc failed !!!\n");
+  }
+#else
+  std::string d_model_data;
+  aes_decrypt_cbc("1234567890", model_data_str, d_model_data);
+#endif
+  printf("\n*********************HHHHHHHHHHHHHHHHQQQQQQQQQQQQQQQQQ*****************************\n");
+
   try {
-    std::istringstream model_stream(model_data_str);
+    //std::istringstream model_stream(model_data_str);
+    std::istringstream model_stream(d_model_data);
     torch_model->reset(
         new torch::jit::Module(torch::jit::load(model_stream, device)));
   }
